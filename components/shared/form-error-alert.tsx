@@ -1,4 +1,4 @@
-// Shows a problem with the whole form (wrong credentials, server down) above the fields.
+// Shows a problem with a whole form (wrong credentials, server down, slot taken) above its fields.
 import { CircleAlertIcon } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";

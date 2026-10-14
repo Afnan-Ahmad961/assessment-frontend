@@ -1,5 +1,6 @@
 "use client";
 // Message input. Enter sends, Shift+Enter adds a new line, and the box grows with its content.
+// While the assistant is replying the user can keep typing, but sending waits for the reply.
 import { useState, type FormEvent, type KeyboardEvent } from "react";
 import { ArrowUpIcon } from "lucide-react";
 
@@ -8,9 +9,14 @@ import { Textarea } from "@/components/ui/textarea";
 
 const MAX_MESSAGE_LENGTH = 2000;
 
-export function ChatComposer({ onSend }: { onSend: (content: string) => void }) {
+type ChatComposerProps = {
+  onSend: (content: string) => void;
+  isReplying: boolean;
+};
+
+export function ChatComposer({ onSend, isReplying }: ChatComposerProps) {
   const [draft, setDraft] = useState("");
-  const canSend = draft.trim().length > 0;
+  const canSend = draft.trim().length > 0 && !isReplying;
 
   function send() {
     if (!canSend) return;

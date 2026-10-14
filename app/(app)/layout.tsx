@@ -6,6 +6,7 @@ import { Suspense, type ReactNode } from "react";
 import { AppLogo } from "@/components/layout/app-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { UserMenu, UserMenuSkeleton } from "@/components/layout/user-menu";
+import { QueryProvider } from "@/components/providers/query-provider";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
@@ -19,7 +20,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </Suspense>
         </div>
       </header>
-      <main className="flex min-h-0 flex-1 flex-col">{children}</main>
+      <main className="flex min-h-0 flex-1 flex-col">
+        <QueryProvider>{children}</QueryProvider>
+      </main>
     </div>
   );
 }

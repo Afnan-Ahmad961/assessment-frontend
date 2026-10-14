@@ -53,6 +53,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Every page, but not API routes, Next.js internals, or static files.
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)"],
+  // Pages and the /api Route Handlers (so their access token gets refreshed too), but not Next.js
+  // internals or static files. Only pages are redirected; /api routes answer 401 themselves.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)"],
 };
