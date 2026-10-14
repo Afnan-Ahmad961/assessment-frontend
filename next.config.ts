@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // "/" has no page of its own: the chat is the home of the app. proxy.ts then sends signed-out
+  // visitors on to /login.
+  async redirects() {
+    return [{ source: "/", destination: "/chat", permanent: false }];
+  },
   experimental: {
     agentFeedback: true,
   },
