@@ -1,12 +1,13 @@
 "use server";
 // Server Actions behind the login and signup forms, plus sign out. They validate input, call the
 // API, store the tokens in httpOnly cookies, and redirect. The tokens never reach the browser's JS.
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import type { BackendError } from "@/lib/api/backend-client";
 import * as authApi from "@/lib/api/auth-api";
+import { getClientIp } from "@/lib/api/client-ip";
 import { REFRESH_TOKEN_COOKIE, SESSION_COOKIE_NAMES, buildSessionCookies } from "@/lib/auth/session-cookies";
 import { validationIssuesSchema } from "@/schemas/api.schema";
 import { loginFormSchema, signupFormSchema } from "@/schemas/auth.schema";
@@ -28,7 +29,7 @@ export async function login(_previous: LoginFormState, formData: FormData): Prom
     return { values, fieldErrors: z.flattenError(parsed.error).fieldErrors };
   }
 
-  const result = await authApi.login(parsed.data);
+  const result = await authApi.login(parsed.data, getClientIp(await headers()));
   if (!result.ok) {
     return { values, ...toFormErrors(result.error) };
   }
@@ -45,7 +46,7 @@ export async function signup(_previous: SignupFormState, formData: FormData): Pr
     return { values, fieldErrors: z.flattenError(parsed.error).fieldErrors };
   }
 
-  const result = await authApi.signup(parsed.data);
+  const result = await authApi.signup(parsed.data, getClientIp(await headers()));
   if (!result.ok) {
     return { values, ...toFormErrors(result.error) };
   }
@@ -60,7 +61,7 @@ export async function logout(): Promise<void> {
 
   // Revoke the session on the API. If that fails, still sign out locally.
   if (refreshToken) {
-    await authApi.logout(refreshToken);
+    await authApi.logout(refreshToken, getClientIp(await headers()));
   }
 
   for (const name of SESSION_COOKIE_NAMES) cookieStore.delete(name);

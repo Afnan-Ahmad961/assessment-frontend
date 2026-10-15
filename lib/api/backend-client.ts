@@ -8,6 +8,8 @@ import type { z } from "zod";
 import { env } from "@/config/env";
 import { apiErrorBodySchema } from "@/schemas/api.schema";
 
+import { clientIpHeaders } from "./client-ip";
+
 export type BackendError = {
   status: number;
   code: string;
@@ -23,6 +25,8 @@ type RequestOptions<T> = {
   accessToken?: string;
   /** Schema for the `data` field of a successful response. Omit for endpoints that return 204. */
   schema?: z.ZodType<T>;
+  /** The browser's IP, passed on for the API's rate limiting. */
+  clientIp?: string | null;
 };
 
 const UNREACHABLE: BackendError = {
@@ -39,9 +43,9 @@ const UNEXPECTED_RESPONSE: BackendError = {
 
 export async function backendRequest<T = undefined>(
   path: string,
-  { method = "GET", body, accessToken, schema }: RequestOptions<T> = {},
+  { method = "GET", body, accessToken, schema, clientIp = null }: RequestOptions<T> = {},
 ): Promise<BackendResult<T>> {
-  const headers = new Headers({ Accept: "application/json" });
+  const headers = new Headers({ Accept: "application/json", ...clientIpHeaders(clientIp) });
   if (body !== undefined) headers.set("Content-Type", "application/json");
   if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
 

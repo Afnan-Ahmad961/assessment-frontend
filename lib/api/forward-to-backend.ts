@@ -2,10 +2,12 @@
 // access token from the httpOnly cookie, and returns the API's response unchanged. The browser
 // never sees the token. Each forwarded endpoint has its own route file, so only those endpoints
 // are reachable (a catch-all would also expose /auth, whose responses contain tokens).
-import { cookies } from "next/headers";
+import { cookies, headers as requestHeaders } from "next/headers";
 
 import { env } from "@/config/env";
 import { ACCESS_TOKEN_COOKIE } from "@/lib/auth/session-cookies";
+
+import { clientIpHeaders, getClientIp } from "./client-ip";
 
 type ForwardOptions = {
   method: "GET" | "POST";
@@ -28,6 +30,7 @@ export async function forwardToBackend(path: string, { method, body, searchParam
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${accessToken}`,
+        ...clientIpHeaders(getClientIp(await requestHeaders())),
         ...(body === undefined ? {} : { "Content-Type": "application/json" }),
       },
       body: body === undefined ? undefined : JSON.stringify(body),

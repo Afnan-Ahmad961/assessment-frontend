@@ -15,7 +15,7 @@ import { useAvailability } from "@/hooks/booking/use-availability";
 import { useBookAppointment } from "@/hooks/booking/use-book-appointment";
 import { useServices } from "@/hooks/booking/use-services";
 import { BffError } from "@/lib/bff/bff-client";
-import { formatTimeInZone, todayInBrowser } from "@/lib/format-booking";
+import { todayInBrowser, toClockValue } from "@/lib/format-booking";
 import type { BookingDraft } from "@/types/chat";
 
 import { TimeSlotPicker } from "./time-slot-picker";
@@ -61,7 +61,7 @@ function BookingForm({ draft, chatSessionId, onBooked }: BookingFormProps) {
   // Until the user picks a time, pre-select the draft's time if it's still free.
   const draftSlot =
     serviceId === draft.service?.id && date === draft.date && availability.data
-      ? availability.data.slots.find((slot) => formatTimeInZone(slot.startsAt, availability.data.timeZone) === draft.time)
+      ? availability.data.slots.find((slot) => toClockValue(slot.startsAt, availability.data.timeZone) === draft.time)
       : undefined;
   const selectedStart = pickedStart ?? draftSlot?.startsAt ?? null;
 

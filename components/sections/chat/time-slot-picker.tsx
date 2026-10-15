@@ -1,7 +1,7 @@
 // Grid of free start times for the chosen service and date. Only real free slots are offered, so
 // the form can't submit a time the API would reject.
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatTimeInZone } from "@/lib/format-booking";
+import { formatClockTime, toClockValue } from "@/lib/format-booking";
 import { cn } from "@/lib/utils";
 
 type Slot = { startsAt: Date };
@@ -54,7 +54,7 @@ export function TimeSlotPicker({ slots, timeZone, isLoading, error, selected, on
                 isSelected ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted",
               )}
             >
-              {formatTimeInZone(slot.startsAt, timeZone)}
+              {formatClockTime(toClockValue(slot.startsAt, timeZone))}
             </button>
           );
         })}

@@ -7,7 +7,7 @@ import { CheckIcon, CircleCheckBigIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { formatCalendarDate } from "@/lib/format-booking";
+import { formatCalendarDate, formatClockTime } from "@/lib/format-booking";
 import { cn } from "@/lib/utils";
 import type { BookingDraft, ChatSession } from "@/types/chat";
 
@@ -19,7 +19,13 @@ type BookingSummaryProps = {
   onOpenForm: () => void;
 };
 
-type DetailRow = { label: string; value: string | null; required: boolean };
+type DetailRow = {
+  label: string;
+  value: string | null;
+  required: boolean;
+  /** Free text that can be long (notes): shown under the label and wrapped, not on one line. */
+  multiline?: boolean;
+};
 
 export function countCompletedDetails(draft: BookingDraft) {
   const required = [draft.service, draft.date, draft.time];
@@ -38,8 +44,8 @@ export function BookingSummary({ session, isConfirming, confirmError, onConfirm,
       required: true,
     },
     { label: "Date", value: draft.date ? formatCalendarDate(draft.date) : null, required: true },
-    { label: "Time", value: draft.time, required: true },
-    { label: "Notes", value: draft.notes, required: false },
+    { label: "Time", value: draft.time ? formatClockTime(draft.time) : null, required: true },
+    { label: "Notes", value: draft.notes, required: false, multiline: true },
   ];
 
   return (
@@ -59,12 +65,21 @@ export function BookingSummary({ session, isConfirming, confirmError, onConfirm,
       )}
 
       <dl className="flex flex-col divide-y rounded-lg border">
-        {rows.map((row) => (
-          <div key={row.label} className="flex items-center justify-between gap-4 px-3 py-2.5">
-            <dt className="text-sm text-muted-foreground">{row.label}</dt>
-            <dd className="min-w-0 text-right text-sm">{renderValue(row)}</dd>
-          </div>
-        ))}
+        {rows.map((row) => {
+          const stacked = row.multiline && row.value;
+          return (
+            <div
+              key={row.label}
+              className={cn(
+                "flex px-3 py-2.5",
+                stacked ? "flex-col gap-1" : "items-center justify-between gap-4",
+              )}
+            >
+              <dt className="shrink-0 text-sm text-muted-foreground">{row.label}</dt>
+              <dd className={cn("min-w-0 text-sm", !stacked && "text-right")}>{renderValue(row)}</dd>
+            </div>
+          );
+        })}
       </dl>
 
       {state === "collecting" || state === "confirming" ? (
@@ -96,9 +111,18 @@ function describeState(state: ChatSession["state"]): string {
 }
 
 function renderValue(row: DetailRow): ReactNode {
+  if (row.value && row.multiline) {
+    // Up to four lines; the full text is in the tooltip.
+    return (
+      <p className="line-clamp-4 font-medium break-words" title={row.value}>
+        {row.value}
+      </p>
+    );
+  }
+
   if (row.value) {
     return (
-      <span className="inline-flex items-center gap-1.5 font-medium">
+      <span className="flex min-w-0 items-center justify-end gap-1.5 font-medium">
         <span className="truncate">{row.value}</span>
         {row.required && <CheckIcon className="size-3.5 shrink-0 text-primary" aria-label="Done" />}
       </span>

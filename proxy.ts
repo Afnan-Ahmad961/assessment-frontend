@@ -6,6 +6,7 @@
 // Server Action, close to the data.
 import { NextResponse, type NextRequest } from "next/server";
 
+import { getClientIp } from "@/lib/api/client-ip";
 import { refreshSession } from "@/lib/auth/refresh-session";
 import {
   ACCESS_TOKEN_COOKIE,
@@ -14,7 +15,7 @@ import {
   buildSessionCookies,
 } from "@/lib/auth/session-cookies";
 
-const PROTECTED_PREFIXES = ["/chat"];
+const PROTECTED_PREFIXES = ["/chat", "/appointments"];
 
 export async function proxy(request: NextRequest) {
   const accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
@@ -24,7 +25,7 @@ export async function proxy(request: NextRequest) {
   let clearSession = false;
 
   if (!accessToken && refreshToken) {
-    const outcome = await refreshSession(refreshToken);
+    const outcome = await refreshSession(refreshToken, getClientIp(request.headers));
 
     if (outcome.status === "refreshed") {
       cookiesToSet = buildSessionCookies(outcome.tokens);

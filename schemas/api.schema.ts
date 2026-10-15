@@ -119,3 +119,9 @@ export const confirmBookingResultSchema = z.object({
   assistantMessage: chatMessageSchema,
   session: chatSessionSchema,
 });
+
+export const appointmentListResultSchema = z.object({
+  appointments: z.array(appointmentSchema),
+  /** The business timezone: show times on this clock, the same one the chat uses. */
+  timeZone: z.string(),
+});
