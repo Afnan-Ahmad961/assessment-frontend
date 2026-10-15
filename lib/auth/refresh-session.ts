@@ -16,12 +16,12 @@ export type RefreshOutcome =
 
 const inFlight = new Map<string, Promise<RefreshOutcome>>();
 
-export function refreshSession(refreshToken: string): Promise<RefreshOutcome> {
+export function refreshSession(refreshToken: string, clientIp: string | null): Promise<RefreshOutcome> {
   const existing = inFlight.get(refreshToken);
   if (existing) return existing;
 
   const request = authApi
-    .refresh(refreshToken)
+    .refresh(refreshToken, clientIp)
     .then((result): RefreshOutcome => {
       if (result.ok) return { status: "refreshed", tokens: result.data.tokens };
       return result.error.status === 401 ? { status: "rejected" } : { status: "unavailable" };

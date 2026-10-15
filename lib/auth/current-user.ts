@@ -2,10 +2,11 @@
 // current user; it checks the session with the API rather than trusting the cookie alone.
 import "server-only";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import * as authApi from "@/lib/api/auth-api";
+import { getClientIp } from "@/lib/api/client-ip";
 import type { User } from "@/types/auth";
 
 import { ACCESS_TOKEN_COOKIE } from "./session-cookies";
@@ -23,7 +24,7 @@ export async function getCurrentUser(): Promise<User> {
     redirect("/login");
   }
 
-  const result = await authApi.getMe(accessToken);
+  const result = await authApi.getMe(accessToken, getClientIp(await headers()));
 
   if (!result.ok) {
     if (result.error.status === 401) {

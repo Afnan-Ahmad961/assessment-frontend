@@ -3,10 +3,10 @@
 import { useActionState } from "react";
 
 import { login, type LoginFormState } from "@/actions/auth.actions";
+import { FormErrorAlert } from "@/components/shared/form-error-alert";
 import { FieldGroup } from "@/components/ui/field";
 
 import { AuthTextField } from "./auth-text-field";
-import { FormErrorAlert } from "./form-error-alert";
 import { SubmitButton } from "./submit-button";
 
 const initialState: LoginFormState = {};
